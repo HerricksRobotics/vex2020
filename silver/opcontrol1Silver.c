@@ -8,7 +8,7 @@
 #define LIFTMOTOR 4
 #define CLAWMOTOR 5
 
-void initialize(){
+void reverse(){
 	motor_set_reversed(RFRONT, true);
 	motor_set_reversed(RBACK, true);
 }
