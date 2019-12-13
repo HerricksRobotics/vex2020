@@ -1,6 +1,4 @@
 #include "main.h"
-#include "math.h"
-
 
 #define RFRONT 20
 #define LFRONT 10
@@ -10,76 +8,97 @@
 #define LLIFT 6
 #define RINTAKE 7
 #define LINTAKE 8
-//3600 ticks per rotation of motor, diameter of wheel is 4
-double ticksperinch = 3600/(M_PI*4);
 
-void setReverse()
-{
-  motor_set_reversed(RFRONT, true);
-  motor_set_reversed(RBACK, true);
-  motor_set_reversed(RINTAKE, true);
-  motor_set_reversed(LINTAKE, true);
+
+//used for distance calculations
+
+//resetting the encoders in the motors to 0
+static double ticksperinch = 286.476723050;
+void reset_encoders() {
+	motor_tare_position(RFRONT);
+	motor_tare_position(LFRONT);
+	motor_tare_position(RBACK);
+	motor_tare_position(LBACK);
+	motor_tare_position(RINTAKE);
+	motor_tare_position(LINTAKE);
+	motor_tare_position(RLIFT);
+	motor_tare_position(LLIFT);
+
 }
-
-void reverse(double distance)
-{
-  motor_move(LFRONT,-distance*ticksperinch);
-	motor_move(LBACK, -distance*ticksperinch);
-  motor_move(RFRONT,-distance*ticksperinch);
-  motor_move(RBACK, -distance*ticksperinch);
+//move a set distance
+void move_distance(int distance){
+	reset_encoders();
+	motor_move_absolute(RFRONT, -distance*ticksperinch, -100);
+	motor_move_absolute(LFRONT, distance*ticksperinch, 100);
+	motor_move_absolute(RBACK, -distance*ticksperinch, -100);
+	motor_move_absolute(LBACK, distance*ticksperinch, 100);
 }
+//turn left a set amount of degrees
+void turn_left(int degrees){
+	motor_move_absolute(RFRONT,(ticksperinch*2*M_PI*9)*(degrees/360), 100);
+	motor_move_absolute(RBACK,(ticksperinch*2*M_PI*9)*(degrees/360), 100);
+	motor_move_absolute(LBACK,-(ticksperinch*2*M_PI*9)*(degrees/360), 100);
+	motor_move_absolute(LFRONT,-(ticksperinch*2*M_PI*9)*(degrees/360), 100);
 
-void turnLeft(double distance)
-{
-  motor_move(LFRONT,-distance*ticksperinch);
-	motor_move(LBACK, -distance*ticksperinch);
-  motor_move(RFRONT,distance*ticksperinch);
-  motor_move(RBACK, distance*ticksperinch);
+
 }
+//turn right a set amount of degrees
+void turn_right(int degrees){
+	motor_move_absolute(RFRONT,-(ticksperinch*2*M_PI*9)*(degrees/360), -100);
+	motor_move_absolute(RBACK,-(ticksperinch*2*M_PI*9)*(degrees/360), -100);
+	motor_move_absolute(LBACK,(ticksperinch*2*M_PI*9)*(degrees/360), 100);
+	motor_move_absolute(LFRONT,(ticksperinch*2*M_PI*9)*(degrees/360), 100);
 
-void turnRight(double distance)
-{
-  motor_move(LFRONT,distance*ticksperinch);
-	motor_move(LBACK, distance*ticksperinch);
-  motor_move(RFRONT,-distance*ticksperinch);
-  motor_move(RBACK, -distance*ticksperinch);
 }
+//turn intake on, 1 is inward, -1 is outward
+void intake_on(int direction){
+	if (direction == 1) {
+		motor_move(LINTAKE, 40);
+		motor_move(RINTAKE, -40);
+	}else if (direction == -1) {
+		motor_move(LINTAKE, -40);
+		motor_move(RINTAKE, 40);
+	}
 
-void forward (double distance)
-{
-  motor_move(LFRONT,distance*ticksperinch);
-	motor_move(LBACK, distance*ticksperinch);
-  motor_move(RFRONT,distance*ticksperinch);
-  motor_move(RBACK, distance*ticksperinch);
 }
-
-void intake ()
-{
-  //This is a guess btw
-  motor_move(LINTAKE, 3600);
-  motor_move(RINTAKE, 3600);
+//turn intake off
+void intake_off(){
+	motor_move(LINTAKE, 0);
+	motor_move(RINTAKE, 0);
 }
-
-void lift ()
-{
-  motor_move(RLIFT,3600);
-  motor_move(LLIFT,3600);
+//move lift up
+void lift_up(distance){
+	reset_encoders();
+	motor_move_absolute(LLIFT, distance*ticksperinch, 100);
+	motor_move_absolute(RLIFT, distance*ticksperinch, -100);
+}
+//move lift down to 0 position
+void lift_down(distance){
+	reset_encoders();
+	motor_move_absolute(LLIFT, -distance*ticksperinch, 100);
+	motor_move_absolute(RLIFT,-distance*ticksperinch, -100);
 }
 
 void autonomous() {
-  setReverse();
-  forward(12);
-  reverse(12);
-  turnRight(14.137167);
-  forward(6);
-  intake();
-  reverse(6);
-  turnLeft(14.137167);
-  forward(12);
-  turnLeft(14.137167+9.424778);//63.777 degrees
-  forward(52.46);
-  intake();
-  forward(1);
-  reverse(1);
+
+	reset_encoders();
+	intake_on(1); // turns on intake pulls block
+	delay(500);
+	intake_off();//turns off intake with block
+	move_distance(23); //moves forward 23 inches
+	intake_on(-1); //flips intake releases the block
+	delay(500);
+	intake_off();
+	move_distance(-28); //moves back 28 inches
+	turn_left(90); // turns left 90 degrees
+	intake_on(1); //turns on the intake
+	move_distance(23); //moves forward 23 inches and picks up block
+	intake_off(); // turns off intake
+	move_distance(-23); //move back 23 inches
+	turn_right(90);//turns 90 right
+	move_distance(28);//moves forward 28 inches
+	intake_on(-1); //flips intake releases the block
+	move_distance(-23); //moves back 23 inches to start position
+	intake_off(); //turns off intake
 
 }
