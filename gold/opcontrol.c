@@ -9,7 +9,8 @@
 #define LLIFT 6
 #define CLAW 7
 #define ARM 8
-
+static int DEADBAND = 35;
+static int CLAWDEADBAND = 90;
 void opcontrol() {
 	while (1) {
 		delay(20);
@@ -27,16 +28,16 @@ void opcontrol() {
 	  // reverses the right motor
 
 	 //motors actually move
-	 motor_move(LFRONT, left);
-	 motor_move(RFRONT, -right);
-	 motor_move(RBACK, -right);
-	 motor_move(LBACK, left);
+	 motor_move(LFRONT, left/2);
+	 motor_move(RFRONT, -right/2);
+	 motor_move(RBACK, -right/2);
+	 motor_move(LBACK, left/2);
 
 	 if (controller_get_digital(CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1)==1 && controller_get_digital(CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R2)==1){
-	 	 motor_move(LFRONT, (left)/2);
-	 	 motor_move(RFRONT, (-right)/2);
-	 	 motor_move(RBACK, (-right)/2);
-	 	 motor_move(LBACK, (left)/2);
+	 	 motor_move(LFRONT, left);
+	 	 motor_move(RFRONT, -right);
+	 	 motor_move(RBACK, -right);
+	 	 motor_move(LBACK, left);
  	 }
 	 else if ( controller_get_digital(CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_R1) == 1) {
 		 //move lift motor
@@ -47,15 +48,17 @@ void opcontrol() {
 		 motor_move(ARM, 0);
 	 }
 
-	 if (controller_get_digital(CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_X) == 1) {
-		 motor_move(CLAW, 40);
-	 } else if (controller_get_digital(CONTROLLER_MASTER, E_CONTROLLER_DIGITAL_B) == 1) {
-		 motor_move(CLAW, -40);
-	 } else {
-		 motor_move(CLAW, 0);
-	 }
 
+ 	 int left_claw = controller_get_analog(CONTROLLER_MASTER, ANALOG_LEFT_X);
+ 	 int right_claw = controller_get_analog(CONTROLLER_MASTER, ANALOG_RIGHT_X);
 
+ 	 //CLAW STUFF THAT SHOULD HAVE BEEN DONE EARLIER BUT OK
+ 	 if (abs(right_claw)>=CLAWDEADBAND && abs(left_claw)>=CLAWDEADBAND){
+ 	 	 motor_move(CLAW, left_claw/6);
+  	 }
+ 	 if (abs(right_claw)<=CLAWDEADBAND && abs(left_claw)<=CLAWDEADBAND){
+ 		 motor_move(CLAW, 0);
+ 	 }
 
 //LIFT STUFF
 
