@@ -21,7 +21,7 @@ void initialize() {
 
 	lcd_set_text(1, "hello");
 	lcd_register_btn1_cb(on_center_button);
-	
+
 }
 
 /**
