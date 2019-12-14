@@ -79,7 +79,7 @@ void lift_down(distance){
 	motor_move_absolute(RLIFT,-distance*ticksperinch, -100);
 }
 
-void autonomous() {
+void blue_square(){ // starting place is the blue square
 
 	reset_encoders();
 	intake_on(1); // turns on intake pulls block
@@ -100,5 +100,35 @@ void autonomous() {
 	intake_on(-1); //flips intake releases the block
 	move_distance(-23); //moves back 23 inches to start position
 	intake_off(); //turns off intake
+
+}
+
+void red_square(){ // starting place is the red square
+
+	reset_encoders();
+	intake_on(1); // turns on intake pulls block
+	delay(500);
+	intake_off();//turns off intake with block
+	move_distance(23); //moves forward 23 inches
+	intake_on(-1); //flips intake releases the block
+	delay(500);
+	intake_off();
+	move_distance(-28); //moves back 28 inches
+	turn_right(90); // turns right 90 degrees
+	intake_on(1); //turns on the intake
+	move_distance(23); //moves forward 23 inches and picks up block
+	intake_off(); // turns off intake
+	move_distance(-23); //move back 23 inches
+	turn_left(90);//turns 90 left
+	move_distance(28);//moves forward 28 inches
+	intake_on(-1); //flips intake releases the block
+	move_distance(-23); //moves back 23 inches to start position
+	intake_off(); //turns off intake
+
+}
+void autonomous() {
+
+	//blue_square(); starting from blue square
+	//red_square(); starting from red_square
 
 }
