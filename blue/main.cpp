@@ -10,7 +10,9 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// Drivetrain           drivetrain    1, 2, 9, 8
+// Drivetrain           drivetrain    1, 2, 11, 12
+// Claw                 motor_group   16, 17
+// Arm                  motor         9
 // Controller1          controller
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
@@ -53,7 +55,6 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  /*
   while (RangeFinderC.distance(mm) / 25.4 > 5) {
     LDRIVE.spin(forward);
     RDRIVE.spin(forward);
@@ -62,30 +63,7 @@ void autonomous(void) {
   }
   LDRIVE.setVelocity(0, percent);
   RDRIVE.setVelocity(0, percent);
-  */
 }
-/*while (1) {
-    VISION7.takeSnapshot(PURPLECUBE);
-    if (VISION7.objectCount > 0) {
-      if (VISION7.largestObject.width > 10 && VISION7.largestObject.height > 10)
-        { Brain.Screen.print(VISION7.objectCount);
-        Brain.Screen.print(VISION7.largestObject.centerX);
-        Brain.Screen.print(VISION7.largestObject.centerY);
-        while (VISION7.objectCount > 0) {
-          RDRIVE.setVelocity(60, percent);
-          RDRIVE.spin(reverse);
-          LDRIVE.setVelocity(60, percent);
-          LDRIVE.spin(forward);
-        }
-      }
-    } else {
-      RDRIVE.setVelocity(60, percent);
-      RDRIVE.spinFor(forward, 45, degrees);
-      LDRIVE.setVelocity(60, percent);
-      LDRIVE.spinFor(reverse, 45, degrees);
-    }
-}
-*/
 
 /*---------------------------------------------------------------------------*/
 /*                                                                           */
@@ -101,30 +79,21 @@ void usercontrol(void) {
   // User control code
   static int DEADBAND = 35;
   while (1) {
-    /*
-    if (bumperA.pressing()) {
-      Brain.Screen.drawRectangle(0, 0, 500, 400, green);
-    }
-    if (limitB.pressing()) {
-      Brain.Screen.drawRectangle(0, 0, 500, 400, blue);
-      vexDelay(1000);
-      Brain.Screen.clearScreen();
-    }
-    */
     Brain.Screen.clearLine();
-    Brain.Screen.print(RangeFinderC.distance(mm) / 25.4);
 
+    // arm movement based on controller right joystick y axis
     int ArmSpeed = Controller1.Axis2.position();
 
     if (abs(ArmSpeed) > DEADBAND) {
-      ARM.setVelocity(ArmSpeed/2, percent);
+      ARM.setVelocity(ArmSpeed, percent);
       ARM.spin(forward);
     } else {
       ARM.setVelocity(0, percent);
     }
 
-    int ClawSpeed = 60;
+    int ClawSpeed = 30;
 
+    // claw movement using L1 and L2
     if (Controller1.ButtonL1.pressing() == true) {
       CLAW.setVelocity(ClawSpeed, percent);
       CLAW.spin(forward);
@@ -158,15 +127,6 @@ void usercontrol(void) {
 
       RDRIVE.setVelocity(0, percent);
     }
-
-    /*VISION7.takeSnapshot(PURPLECUBE);
-    if (VISION7.objectCount > 0) {
-      if (VISION7.largestObject.width > 10 && VISION7.largestObject.height > 10)
-    { Brain.Screen.print(VISION7.objectCount);
-        Brain.Screen.print(VISION7.largestObject.centerX);
-        Brain.Screen.print(VISION7.largestObject.centerY);
-      }
-    }*/
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
